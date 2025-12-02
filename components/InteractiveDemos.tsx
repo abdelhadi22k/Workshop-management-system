@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Check, Truck, RefreshCw, ShoppingBag, Play, Pause } from 'lucide-react';
+import { ShoppingBag, Play, Pause } from 'lucide-react';
 
 export const InventoryDemo: React.FC = () => {
   const [stock, setStock] = useState(124);
@@ -34,6 +34,7 @@ export const InventoryDemo: React.FC = () => {
       </div>
       
       <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden mb-4">
+        {/* Progress bar fills from right to left in RTL document flow */}
         <div 
           className={`absolute top-0 right-0 h-full transition-all duration-500 ease-out ${stock < 20 ? 'bg-red-500' : 'bg-emerald-500'}`}
           style={{ width: `${(stock / 150) * 100}%` }}
@@ -59,10 +60,13 @@ export const TrackingDemo: React.FC = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval>;
     if (isAutoPlaying) {
       interval = setInterval(() => {
-        setCurrentStep(prev => (prev + 1) % steps.length);
+        setCurrentStep(prev => {
+            if (prev === 3) return 0;
+            return prev + 1;
+        });
       }, 2000);
     }
     return () => clearInterval(interval);
@@ -70,9 +74,10 @@ export const TrackingDemo: React.FC = () => {
 
   const toggleDemo = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isAutoPlaying && currentStep === 3) {
+        setCurrentStep(0);
+    }
     setIsAutoPlaying(!isAutoPlaying);
-    // If we are at the end and click play, start over
-    if (!isAutoPlaying && currentStep === 3) setCurrentStep(0);
   };
 
   return (
@@ -105,7 +110,7 @@ export const TrackingDemo: React.FC = () => {
         {/* Line Background */}
         <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-700 -z-0"></div>
         
-        {/* Active Line Progress */}
+        {/* Active Line Progress: In RTL 'right-0' anchors it to the start of the flow */}
         <div 
             className="absolute top-1/2 right-0 h-0.5 bg-emerald-500 -z-0 transition-all duration-500 ease-in-out"
             style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
